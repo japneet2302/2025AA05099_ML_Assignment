@@ -85,8 +85,6 @@ project-folder/
 │   ├── model_training.ipynb
 
 
----
-
 ## 7. Deployment
 The application is deployed on **Streamlit Community Cloud**.  
 The live application link is included in the final submission PDF.
