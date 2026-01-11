@@ -82,13 +82,8 @@ project-folder/
 │-- requirements.txt
 │-- README.md
 │-- model/
-│   ├── logistic.py
-│   ├── decision_tree.py
-│   ├── knn.py
-│   ├── naive_bayes.py
-│   ├── random_forest.py
-│   ├── xgboost.py
-```
+│   ├── model_training.ipynb
+
 
 ---
 
