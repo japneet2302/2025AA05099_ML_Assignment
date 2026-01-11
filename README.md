@@ -22,6 +22,7 @@ The task is to predict whether an individual’s annual income exceeds **$50K** 
 Missing values represented as `"?"` were handled by replacing them with `"Unknown"`.  
 Categorical features were encoded using **OneHotEncoding**, and numerical features were scaled using **StandardScaler**.
 
+“The Adult Census Income Dataset (UCI) was used. As it is publicly available, the dataset is not included and can be uploaded by the user in the Streamlit app.”
 ---
 
 ## 3. Models Used and Evaluation Metrics
