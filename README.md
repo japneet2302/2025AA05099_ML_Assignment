@@ -1,5 +1,5 @@
 # 📘 Machine Learning Assignment 2  
-**M.Tech (AIML / DSE) – BITS Pilani**
+**M.Tech (AIML ML Assignment 2) – BITS Pilani**
 
 ---
 
