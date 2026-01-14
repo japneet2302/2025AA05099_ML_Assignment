@@ -71,10 +71,22 @@ y = data["income"].map({"<=50K": 0, ">50K": 1})
 num_cols = X.select_dtypes(include=["int64", "float64"]).columns
 cat_cols = X.select_dtypes(include=["object"]).columns
 
-preprocessor = ColumnTransformer(
+# --------------------------------------------------
+# Two preprocessors:
+# 1. Sparse (default) → for most models
+# 2. Dense → ONLY for Naive Bayes
+# --------------------------------------------------
+sparse_preprocessor = ColumnTransformer(
     transformers=[
         ("num", StandardScaler(), num_cols),
         ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
+    ]
+)
+
+dense_preprocessor = ColumnTransformer(
+    transformers=[
+        ("num", StandardScaler(), num_cols),
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_cols)
     ]
 )
 
@@ -95,22 +107,28 @@ model_name = st.sidebar.selectbox(
     )
 )
 
-def get_model(name):
+def get_model_and_preprocessor(name):
     if name == "Logistic Regression":
-        return LogisticRegression(max_iter=1000)
+        return LogisticRegression(max_iter=1000), sparse_preprocessor
+
     elif name == "Decision Tree":
-        return DecisionTreeClassifier(random_state=42)
+        return DecisionTreeClassifier(random_state=42), sparse_preprocessor
+
     elif name == "KNN":
-        return KNeighborsClassifier(n_neighbors=5)
+        return KNeighborsClassifier(n_neighbors=5), sparse_preprocessor
+
     elif name == "Naive Bayes":
-        return GaussianNB()
+        # 🔑 IMPORTANT FIX
+        return GaussianNB(), dense_preprocessor
+
     elif name == "Random Forest":
-        return RandomForestClassifier(n_estimators=100, random_state=42)
+        return RandomForestClassifier(n_estimators=100, random_state=42), sparse_preprocessor
+
     elif name == "XGBoost":
         return XGBClassifier(
             eval_metric="logloss",
             random_state=42
-        )
+        ), sparse_preprocessor
 
 # --------------------------------------------------
 # Train-test split
@@ -126,7 +144,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # --------------------------------------------------
 # Model training
 # --------------------------------------------------
-model = get_model(model_name)
+model, preprocessor = get_model_and_preprocessor(model_name)
 
 pipeline = Pipeline([
     ("preprocessor", preprocessor),
@@ -168,4 +186,3 @@ cm_df = pd.DataFrame(
 )
 
 st.dataframe(cm_df)
-
