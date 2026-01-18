@@ -3,146 +3,180 @@ import pandas as pd
 import numpy as np
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score,
-    f1_score, confusion_matrix
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    matthews_corrcoef,
+    confusion_matrix
 )
 
+from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+
+from xgboost import XGBClassifier
 
 # --------------------------------------------------
-# Page Config
+# PAGE CONFIG
 # --------------------------------------------------
-st.set_page_config(page_title="Adult Census Income Prediction", layout="wide")
-st.title("Adult Census Income Prediction App")
+st.set_page_config(page_title="ML Assignment 2", layout="wide")
+
+st.title("Machine Learning Model Evaluation – Adult Census Dataset")
 
 # --------------------------------------------------
-# Download test.csv button
+# LOAD TRAINING DATA (adult.csv)
 # --------------------------------------------------
+@st.cache_data
+def load_training_data():
+    df = pd.read_csv("adult.csv")
+    df["income"] = df["income"].str.strip()
+    return df
+
+train_df = load_training_data()
+
+# --------------------------------------------------
+# DOWNLOAD SAMPLE TEST CSV
+# --------------------------------------------------
+st.subheader("Download Sample Test CSV")
+
 with open("test.csv", "rb") as f:
     st.download_button(
-        label="Download Sample Test CSV",
+        label="Download Test CSV",
         data=f,
         file_name="test.csv",
         mime="text/csv"
     )
 
 # --------------------------------------------------
-# Upload CSV
+# UPLOAD TEST DATASET
 # --------------------------------------------------
-st.sidebar.header("Upload Dataset")
-uploaded_file = st.sidebar.file_uploader(
+st.subheader("Upload Test Dataset")
+uploaded_file = st.file_uploader(
     "Upload CSV file (Adult Census format)",
     type=["csv"]
 )
 
 if uploaded_file is None:
-    st.info("Please upload adult.csv or test.csv to proceed.")
+    st.warning("Please upload test.csv to evaluate the model.")
     st.stop()
 
-# --------------------------------------------------
-# Load data
-# --------------------------------------------------
-data = pd.read_csv(uploaded_file)
-st.subheader("Dataset Preview")
-st.dataframe(data.head())
+test_df = pd.read_csv(uploaded_file)
+st.subheader("Uploaded Dataset Preview")
+st.dataframe(test_df.head())
 
 # --------------------------------------------------
-# Validate target column
+# DATA PREPROCESSING FUNCTION
 # --------------------------------------------------
-if "income" not in data.columns:
-    st.error(
-        "❌ Column 'income' not found.\n\n"
-        "For this assignment, the dataset MUST contain the target column "
-        "`income` to compute confusion matrix and metrics."
-    )
-    st.stop()
+def preprocess(df, fit=False, scaler=None):
+    df = df.copy()
+    df["income"] = df["income"].str.strip()
+    y = df["income"].map({"<=50K": 0, ">50K": 1})
+    X = df.drop("income", axis=1)
+
+    X = pd.get_dummies(X)
+
+    if fit:
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        return X_scaled, y, scaler, X.columns
+    else:
+        X_scaled = scaler.transform(X)
+        return X_scaled, y
 
 # --------------------------------------------------
-# Preprocessing
+# TRAIN / TEST SPLIT (TEMPORAL SAFE)
 # --------------------------------------------------
-data.replace("?", np.nan, inplace=True)
+X_train, y_train, scaler, feature_cols = preprocess(train_df, fit=True)
 
-for col in data.select_dtypes(include="object").columns:
-    data[col].fillna("Unknown", inplace=True)
+X_test = test_df.drop("income", axis=1)
+X_test = pd.get_dummies(X_test)
+X_test = X_test.reindex(columns=feature_cols, fill_value=0)
+X_test = scaler.transform(X_test)
 
-X = data.drop("income", axis=1)
-y = data["income"].map({"<=50K": 0, ">50K": 1})
+y_test = test_df["income"].str.strip().map({"<=50K": 0, ">50K": 1})
 
-categorical_cols = X.select_dtypes(include="object").columns
-numerical_cols = X.select_dtypes(exclude="object").columns
+# --------------------------------------------------
+# MODEL SELECTION
+# --------------------------------------------------
+st.subheader("Model Selection")
 
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_cols),
-        ("num", "passthrough", numerical_cols)
+model_name = st.selectbox(
+    "Choose a Machine Learning Model",
+    [
+        "Logistic Regression",
+        "KNN",
+        "Decision Tree",
+        "Random Forest",
+        "Naive Bayes",
+        "XGBoost"
     ]
 )
 
-# --------------------------------------------------
-# Model selection
-# --------------------------------------------------
-st.sidebar.header("Model Selection")
-model_choice = st.sidebar.selectbox(
-    "Choose a Machine Learning Model",
-    ["KNN", "Decision Tree", "Random Forest"]
-)
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "KNN": KNeighborsClassifier(n_neighbors=5),
+    "Decision Tree": DecisionTreeClassifier(random_state=42),
+    "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
+    "Naive Bayes": GaussianNB(),
+    "XGBoost": XGBClassifier(
+        use_label_encoder=False,
+        eval_metric="logloss",
+        random_state=42
+    )
+}
 
-if model_choice == "KNN":
-    model = KNeighborsClassifier(n_neighbors=5)
-elif model_choice == "Decision Tree":
-    model = DecisionTreeClassifier(random_state=42)
+model = models[model_name]
+
+# --------------------------------------------------
+# TRAIN MODEL
+# --------------------------------------------------
+model.fit(X_train, y_train)
+
+# --------------------------------------------------
+# PREDICTION
+# --------------------------------------------------
+y_pred = model.predict(X_test)
+
+if hasattr(model, "predict_proba"):
+    y_proba = model.predict_proba(X_test)[:, 1]
 else:
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-
-pipeline = Pipeline([
-    ("preprocessor", preprocessor),
-    ("model", model)
-])
+    y_proba = y_pred
 
 # --------------------------------------------------
-# Train-test split
+# METRICS
 # --------------------------------------------------
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
-    test_size=0.2,
-    random_state=42,
-    stratify=y
-)
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, zero_division=0)
+recall = recall_score(y_test, y_pred, zero_division=0)
+f1 = f1_score(y_test, y_pred, zero_division=0)
+auc = roc_auc_score(y_test, y_proba)
+mcc = matthews_corrcoef(y_test, y_pred)
 
-# --------------------------------------------------
-# Train model
-# --------------------------------------------------
-pipeline.fit(X_train, y_train)
-
-# --------------------------------------------------
-# Predictions
-# --------------------------------------------------
-y_pred = pipeline.predict(X_test)
-
-# --------------------------------------------------
-# Metrics
-# --------------------------------------------------
 st.subheader("Model Performance Metrics")
 
 col1, col2, col3, col4 = st.columns(4)
+col1.metric("Accuracy", f"{accuracy:.4f}")
+col2.metric("Precision", f"{precision:.4f}")
+col3.metric("Recall", f"{recall:.4f}")
+col4.metric("F1 Score", f"{f1:.4f}")
 
-col1.metric("Accuracy", f"{accuracy_score(y_test, y_pred):.4f}")
-col2.metric("Precision", f"{precision_score(y_test, y_pred):.4f}")
-col3.metric("Recall", f"{recall_score(y_test, y_pred):.4f}")
-col4.metric("F1 Score", f"{f1_score(y_test, y_pred):.4f}")
+col5, col6 = st.columns(2)
+col5.metric("AUC", f"{auc:.4f}")
+col6.metric("MCC", f"{mcc:.4f}")
 
 # --------------------------------------------------
-# Confusion Matrix
+# CONFUSION MATRIX
 # --------------------------------------------------
 st.subheader("Confusion Matrix")
 
 cm = confusion_matrix(y_test, y_pred)
+
 cm_df = pd.DataFrame(
     cm,
     index=["Actual <=50K", "Actual >50K"],
@@ -150,18 +184,3 @@ cm_df = pd.DataFrame(
 )
 
 st.dataframe(cm_df)
-
-# --------------------------------------------------
-# Prediction Preview
-# --------------------------------------------------
-st.subheader("Prediction Sample")
-
-sample_preds = pipeline.predict(X.head(10))
-sample_probs = pipeline.predict_proba(X.head(10))[:, 1]
-
-preview = X.head(10).copy()
-preview["Actual Income"] = y.head(10).map({0: "<=50K", 1: ">50K"})
-preview["Predicted Income"] = np.where(sample_preds == 1, ">50K", "<=50K")
-preview["Confidence"] = sample_probs.round(3)
-
-st.dataframe(preview)
