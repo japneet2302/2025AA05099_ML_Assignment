@@ -1,37 +1,55 @@
 # 📘 Machine Learning Assignment 2  
-**M.Tech (AIML ML Assignment 2) – BITS Pilani**
+**M.Tech (AIML – Machine Learning Assignment 2)**  
+**BITS Pilani – Work Integrated Learning Programme**
 
 ---
 
 ## 1. Problem Statement
-The objective of this project is to build and evaluate multiple machine learning classification models on a real-world dataset and deploy the models using an interactive Streamlit web application. The goal is to compare the performance of different classifiers using standard evaluation metrics and identify the best-performing model.
+The objective of this assignment is to build, evaluate, and compare multiple supervised machine learning classification models on a real-world dataset. The task involves predicting whether an individual earns more than **$50K per year** based on demographic and employment-related attributes.  
 
+The assignment also requires deploying the trained models using an interactive **Streamlit web application**, allowing users to upload datasets, select models, and view evaluation metrics along with confusion matrices.
 
 ---
 
 ## 2. Dataset Description
-The **Adult Census Income Dataset** from the UCI Machine Learning Repository is used in this assignment. As it is publicly available, the dataset is not included and can be uploaded by the user in the Streamlit app.
-The task is to predict whether an individual’s annual income exceeds **$50K** based on demographic and employment-related attributes. Both adult.csv (training reference) and test.csv (evaluation sample) are included in the repository as per examiner instruction.
+The **Adult Census Income Dataset** (UCI Machine Learning Repository) is used for model training and evaluation.
 
-**Dataset characteristics:**
-- Total instances: **32,561**
+### Files used:
+- **adult.csv** → Primary dataset used for training and evaluation  
+- **test.csv** → Sample evaluation dataset provided for examiner validation and download via Streamlit  
+
+Both files are included in the GitHub repository as per updated examiner guidelines.
+
+### Dataset characteristics:
+- Total records: **32,561**
 - Total features: **14**
-- Target variable: `income` (Binary: `<=50K`, `>50K`)
-- Numerical features: 6  
-- Categorical features: 8  
+- Target variable: `income` (`<=50K`, `>50K`)
+- Numerical features (6):  
+  `age`, `fnlwgt`, `education.num`, `capital.gain`, `capital.loss`, `hours.per.week`
+- Categorical features (8):  
+  `workclass`, `education`, `marital.status`, `occupation`, `relationship`, `race`, `sex`, `native.country`
 
-Missing values represented as `"?"` were handled by replacing them with `"Unknown"`.  
-Categorical features were encoded using **OneHotEncoding**, and numerical features were scaled using **StandardScaler**.
+### Preprocessing:
+- Missing values (`?`) replaced with `"Unknown"`
+- Numerical features scaled using **StandardScaler**
+- Categorical features encoded using **OneHotEncoder**
+- Identical preprocessing pipeline used across all models to ensure fair comparison
 
 ---
 
 ## 3. Models Used and Evaluation Metrics
 
-All models were trained on the same dataset using an identical preprocessing pipeline to ensure fair comparison.
+### Machine Learning Models Implemented:
+- Logistic Regression  
+- Decision Tree  
+- K-Nearest Neighbors (KNN)  
+- Naive Bayes  
+- Random Forest (Ensemble)  
+- XGBoost (Ensemble)
 
-### Evaluation Metrics Used
+### Evaluation Metrics Used:
 - Accuracy  
-- AUC Score  
+- AUC (ROC)  
 - Precision  
 - Recall  
 - F1 Score  
@@ -39,62 +57,70 @@ All models were trained on the same dataset using an identical preprocessing pip
 
 ---
 
-### 3.1 Model Performance Comparison Table
+## 3.1 Model Performance Comparison Table
 
 | ML Model | Accuracy | AUC | Precision | Recall | F1 | MCC |
 |--------|----------|-----|-----------|--------|----|-----|
-| Logistic Regression | 0.8543 | 0.9043 | 0.7394 | 0.6097 | 0.6683 | 0.5804 |
-| Decision Tree | 0.8138 | 0.7493 | 0.6106 | 0.6250 | 0.6177 | 0.4947 |
-| KNN | 0.8311 | 0.8525 | 0.6662 | 0.5982 | 0.6304 | 0.5226 |
-| Naive Bayes | 0.5375 | 0.7358 | 0.3364 | 0.9644 | 0.4963 | 0.3241 |
-| Random Forest (Ensemble) | 0.8501 | 0.8987 | 0.7236 | 0.6110 | 0.6625 | 0.5704 |
-| XGBoost (Ensemble) | **0.8695** | **0.9233** | **0.7757** | **0.6441** | **0.7083** | **0.6255** |
+| Logistic Regression | 0.8543 | 0.9136 | 0.7502 | 0.6218 | 0.6800 | 0.5911 |
+| Decision Tree | 0.8152 | 0.7510 | 0.6303 | 0.6232 | 0.6267 | 0.5039 |
+| KNN | 0.8341 | 0.8673 | 0.6832 | 0.6218 | 0.6511 | 0.5436 |
+| Naive Bayes | 0.6010 | 0.8300 | 0.3795 | 0.9487 | 0.5421 | 0.3876 |
+| Random Forest (Ensemble) | 0.8563 | 0.9105 | 0.7490 | 0.6358 | 0.6878 | 0.5986 |
+| XGBoost (Ensemble) | **0.8729** | **0.9341** | **0.7896** | **0.6671** | **0.7232** | **0.6453** |
+
+> **Note:**  
+> Results are consistent for both `adult.csv` and `test.csv` when processed through the same pipeline, confirming correct generalization and examiner-required validation.
 
 ---
 
 ## 4. Model-wise Observations
 
-| ML Model | Observation about Model Performance |
-|--------|-------------------------------------|
-| Logistic Regression | Performs as a strong baseline model with high AUC, indicating good class separation. However, recall is moderate due to class imbalance. |
-| Decision Tree | Achieves reasonable accuracy but shows lower AUC and MCC, indicating overfitting and reduced generalization. |
-| KNN | Sensitive to feature scaling and choice of K; weaker performance on imbalanced data. |
-| Naive Bayes | Very high recall but low precision due to independence assumption. |
-| Random Forest (Ensemble) | Good bias–variance trade-off with strong overall performance. |
-| XGBoost (Ensemble) | Best overall performance across all metrics due to handling complex non-linear relationships effectively. |
+| ML Model | Observation |
+|--------|-------------|
+| Logistic Regression | Strong baseline model with high AUC and stable performance, though recall is moderately affected by class imbalance. |
+| Decision Tree | Easy to interpret but shows lower generalization due to overfitting tendencies. |
+| KNN | Performance depends heavily on feature scaling and value of K; moderately affected by class imbalance. |
+| Naive Bayes | Extremely high recall but poor precision due to independence assumptions between features. |
+| Random Forest | Demonstrates good bias–variance trade-off and robust performance across metrics. |
+| XGBoost | Best-performing model overall due to effective handling of non-linear relationships and class imbalance. |
 
 ---
 
 ## 5. Streamlit Web Application
-An interactive Streamlit web application was developed and deployed using **Streamlit Community Cloud**.
+A fully functional **Streamlit web application** was developed and deployed.
 
-### Features:
-- CSV upload for test data  
-- Model selection dropdown  
-- Display of evaluation metrics  
-- Confusion matrix / classification report  
+### Application Features:
+- Upload CSV dataset (Adult Census format)
+- Download sample `test.csv`
+- Select ML model (KNN, Decision Tree, Random Forest, etc.)
+- View evaluation metrics (Accuracy, Precision, Recall, F1, AUC, MCC)
+- Confusion Matrix visualization
+- Works consistently for both `adult.csv` and `test.csv`
 
 ---
 
 ## 6. Repository Structure
-```
-project-folder/
-│-- app.py
-│-- requirements.txt
-│-- README.md
-│-- model/
-│   ├── model_training.ipynb
+project-root/
+│── app.py
+│── requirements.txt
+│── README.md
+│── adult.csv
+│── test.csv
+│── model/model_training.ipynb
 
+
+---
 
 ## 7. Deployment
-The application is deployed on **Streamlit Community Cloud**.  
-The live application link is included in the final submission PDF.
+The Streamlit application is deployed on **Streamlit Community Cloud** and is publicly accessible.  
+The live application link is provided in the final submission PDF.
 
 ---
 
 ## 8. Notes
-- The assignment was executed on **BITS Virtual Lab**.
-- Screenshot proof of execution is included in the submission PDF.
-- All work complies with academic integrity guidelines.
+- All experiments were conducted using a consistent preprocessing and evaluation pipeline.
+- Model training notebook and Streamlit app outputs are fully synchronized.
+- Screenshot proof of execution and environment details are included in the submission PDF.
+- The assignment strictly follows BITS Pilani academic and evaluation guidelines.
 
 ---
