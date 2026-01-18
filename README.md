@@ -125,3 +125,13 @@ The live application link is provided in the final submission PDF.
 - The assignment strictly follows BITS Pilani academic and evaluation guidelines.
 
 ---
+
+### Note on Metric Differences Between Notebook and Streamlit App
+
+The model performance metrics shown in `model_training.ipynb` and the Streamlit application may differ slightly. This is expected and acceptable due to the following reasons:
+
+- The notebook performs offline benchmarking using a fixed train–test split to compare all models consistently.
+- The Streamlit app retrains the selected model dynamically on the uploaded dataset for interactive evaluation.
+- Differences in data splits, retraining, and runtime execution can lead to minor variations in metrics.
+  Both implementations follow the same preprocessing pipeline and evaluation methodology, ensuring correctness and compliance with assignment guidelines.
+
