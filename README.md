@@ -11,7 +11,7 @@ The objective of this project is to build and evaluate multiple machine learning
 
 ## 2. Dataset Description
 The **Adult Census Income Dataset** from the UCI Machine Learning Repository is used in this assignment. As it is publicly available, the dataset is not included and can be uploaded by the user in the Streamlit app.
-The task is to predict whether an individual’s annual income exceeds **$50K** based on demographic and employment-related attributes.
+The task is to predict whether an individual’s annual income exceeds **$50K** based on demographic and employment-related attributes. Both adult.csv (training reference) and test.csv (evaluation sample) are included in the repository as per examiner instruction.
 
 **Dataset characteristics:**
 - Total instances: **32,561**
