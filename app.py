@@ -36,6 +36,17 @@ st.title("💼 Income Prediction using Machine Learning")
 st.write("Predict whether income exceeds $50K using different ML classification models.")
 
 # --------------------------------------------------
+# Download Sample Test CSV
+# --------------------------------------------------
+st.subheader("⬇️ Download Sample Test CSV")
+with open("test.csv", "rb") as f:
+    st.download_button(
+        label="Download Test CSV",
+        data=f,
+        file_name="test.csv",
+        mime="text/csv"
+    )
+# --------------------------------------------------
 # Sidebar: Upload dataset
 # --------------------------------------------------
 st.sidebar.header("Upload Test Dataset")
