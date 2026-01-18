@@ -101,12 +101,13 @@ A fully functional **Streamlit web application** was developed and deployed.
 
 ## 6. Repository Structure
 project-root/
-│── app.py
-│── requirements.txt
-│── README.md
-│── adult.csv
-│── test.csv
-│── model/model_training.ipynb
+├── model/
+│   └── model_training.ipynb
+├── README.md
+├── adult.csv
+├── app.py
+├── requirements.txt
+└── test.csv
 
 
 ---
