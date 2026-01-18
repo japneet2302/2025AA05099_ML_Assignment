@@ -75,8 +75,11 @@ data.replace("?", np.nan, inplace=True)
 
 for col in data.select_dtypes(include="object").columns:
     data[col].fillna("Unknown", inplace=True)
-
-X = data.drop("income", axis=1)
+    
+if "income" in data.columns:
+    X = data.drop("income", axis=1)
+else:
+    X = data.copy()
 y = data["income"].map({"<=50K": 0, ">50K": 1})
 
 num_cols = X.select_dtypes(include=["int64", "float64"]).columns
