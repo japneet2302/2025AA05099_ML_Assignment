@@ -69,7 +69,7 @@ Both files are included in the GitHub repository as per updated examiner guideli
 | XGBoost (Ensemble) | **0.8729** | **0.9341** | **0.7896** | **0.6671** | **0.7232** | **0.6453** |
 
 > **Note:**  
-> Results are consistent for both `adult.csv` and `test.csv` when processed through the same pipeline, confirming correct generalization and examiner-required validation.
+> Results are consistent for both `adult.csv` and `test.csv` when processed through the same pipeline, confirming correct generalization.
 
 ---
 
